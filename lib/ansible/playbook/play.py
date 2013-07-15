@@ -21,6 +21,7 @@ from ansible.utils.template import template
 from ansible import utils
 from ansible import errors
 from ansible.playbook.task import Task
+import pipes
 import shlex
 import os
 
@@ -180,14 +181,14 @@ class Play(object):
             if not os.path.isfile(task) and not os.path.isfile(handler) and not os.path.isfile(vars_file) and not os.path.isdir(library):
                 raise errors.AnsibleError("found role at %s, but cannot find %s or %s or %s or %s" % (path, task, handler, vars_file, library))
             if os.path.isfile(task):
-                nt = dict(include=task, vars=has_dict)
+                nt = dict(include=pipes.quote(task), vars=has_dict)
                 if when:
                     nt['when'] = when
                 if with_items:
                     nt['with_items'] = with_items
                 new_tasks.append(nt)
             if os.path.isfile(handler):
-                nt = dict(include=handler, vars=has_dict)
+                nt = dict(include=pipe.quotes(handler), vars=has_dict)
                 if when:
                     nt['when'] = when
                 if with_items:
