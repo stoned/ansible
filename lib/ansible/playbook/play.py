@@ -188,7 +188,7 @@ class Play(object):
                     nt['with_items'] = with_items
                 new_tasks.append(nt)
             if os.path.isfile(handler):
-                nt = dict(include=pipe.quotes(handler), vars=has_dict)
+                nt = dict(include=pipes.quote(handler), vars=has_dict)
                 if when:
                     nt['when'] = when
                 if with_items:
