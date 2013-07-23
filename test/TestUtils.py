@@ -453,6 +453,7 @@ class TestUtils(unittest.TestCase):
         assert(ansible.utils.check_conditional(
             'jinja2_compare bar != 42', '/', {'bar': 42}) == False)
 
+
     def test_check_conditional_jinja2_expression_in_variable(self):
         assert(ansible.utils.check_conditional(
             'jinja2_compare var', '/', {'var': '1 == 1'}) == True)
@@ -460,6 +461,12 @@ class TestUtils(unittest.TestCase):
             'jinja2_compare var', '/', {'var': 'bar == 42', 'bar': 42}) == True)
         assert(ansible.utils.check_conditional(
             'jinja2_compare var', '/', {'var': 'bar != 42', 'bar': 42}) == False)
+
+    def test_check_conditional_jinja2_unicode(self):
+        assert(ansible.utils.check_conditional(
+            u'jinja2_compare "\u00df"', '/', {}) == True)
+        assert(ansible.utils.check_conditional(
+            u'jinja2_compare var == "\u00df"', '/', {'var': u'\u00df'}) == True)
 
 
     #####################################
