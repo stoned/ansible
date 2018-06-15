@@ -11,6 +11,13 @@ import json
 
 from yaml import YAMLError
 
+HAS_JSONNET = False
+try:
+    import _jsonnet
+    HAS_JSONNET = True
+except ImportError:
+    pass
+
 from ansible.errors import AnsibleParserError
 from ansible.errors.yaml_strings import YAML_SYNTAX_ERROR
 from ansible.module_utils._text import to_native
@@ -60,6 +67,14 @@ def from_yaml(data, file_name='<string>', show_content=True, vault_secrets=None)
     a JSON or YAML string.
     '''
     new_data = None
+
+    if HAS_JSONNET:
+        try:
+            json_str = _jsonnet.evaluate_snippet(file_name, to_native(data))
+            data = json_str
+        except RuntimeError as e:
+            print(e)
+            pass
 
     try:
         # in case we have to deal with vaults
