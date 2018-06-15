@@ -23,6 +23,95 @@ run directly from the development branch - while significant efforts are made to
 ``devel`` is reasonably stable, you're more likely to encounter breaking changes when running
 Ansible this way.
 
+Simplistic Jsonnet support
+==========================
+
+A playbook in jsonnet::
+
+        local play(name, tasks) = {
+          name: name,
+          gather_facts: false,
+          connection: 'local',
+          hosts: 'all',
+          tasks: tasks,
+        };
+        [
+          play('play1', [
+            {
+              debug: {
+                var: 'inventory_hostname',
+              },
+            },
+          ])
+          ,
+          play('play2', [
+            {
+              include_vars: 'myvars.jsonnet',
+            },
+            {
+              debug: {
+                msg: 'play {{ (1 + 1) ~ ": with some jsonnet: care for some " ~ myvar.message ~ "?" }}',
+              },
+            },
+            {
+              debug: {
+                var: 'myvar',
+              },
+            },
+          ]),
+        ]
+
+
+The vars file mentionned by the playbook, also in jsonnet::
+
+
+        local msg = std.join('', std.map(std.char, [74, 105, 110, 106, 97, 50]));
+        {
+          myvar: {
+            message: msg,
+            upper: std.asciiUpper(msg),
+            lower: std.asciiLower(msg),
+          },
+        }
+
+
+Now let's try to apply it::
+
+
+	$ ansible-playbook -i localhost, playbook.jsonnet
+	
+	PLAY [play1] ***************************************************************************************************************************
+	
+	TASK [debug] ***************************************************************************************************************************
+	ok: [localhost] => {
+	    "inventory_hostname": "localhost"
+	}
+	
+	PLAY [play2] ***************************************************************************************************************************
+	
+	TASK [include_vars] ********************************************************************************************************************
+	ok: [localhost]
+	
+	TASK [debug] ***************************************************************************************************************************
+	ok: [localhost] => {
+	    "msg": "play 2: with some jsonnet: care for some Jinja2?"
+	}
+	
+	TASK [debug] ***************************************************************************************************************************
+	ok: [localhost] => {
+	    "myvar": {
+	        "lower": "jinja2",
+	        "message": "Jinja2",
+	        "upper": "JINJA2"
+	    }
+	}
+	
+	PLAY RECAP *****************************************************************************************************************************
+	localhost                  : ok=4    changed=0    unreachable=0    failed=0
+	
+	
+
+
 Design Principles
 =================
 
